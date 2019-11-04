@@ -139,23 +139,24 @@ struct ScalarRef {
 
   ScalarRef(const T& a0) : a(a0){};
   value_t operator[](size_t i) const { return a; }
+  value_t operator()(size_t i,size_t j) const { return a;};
 };
 
 
 template <class A, class Op>
-struct UnaryXpr {
+struct ArrayUnaryXpr {
   typedef typename Op::value_t result_t;
   typedef typename Op::value_t value_t;
   typedef std::size_t size_type;
   const A a;
 
-  UnaryXpr(const A& a0) : a(a0){};
+  ArrayUnaryXpr(const A& a0) : a(a0){};
    result_t operator[](size_t i) const { return Op::eval(a[i]); }
   size_type size() const { return a.size(); }
 };
 
 template <class A, class B, class Op>
-struct BinaryXpr {
+struct ArrayBinaryXpr {
   typedef typename Op::value_t result_t;
   typedef typename A::value_t a_value_t;
   typedef typename B::value_t b_value_t;
@@ -165,7 +166,7 @@ struct BinaryXpr {
   const A a;
   const B b;
 
-  BinaryXpr(const A& a0, const B& b0) : a(a0), b(b0){};
+  ArrayBinaryXpr(const A& a0, const B& b0) : a(a0), b(b0){};
    result_t operator[](size_t i) const { return Op::eval(a[i], b[i]); }
   size_type size() const { return a.size(); }
 };
@@ -262,31 +263,31 @@ struct PlusOp {
 
 #define PETLIB_MAKE_OP_(name_,sym_) \
 template <class ArrayA_t, class ArrayB_t, typename A_t, typename B_t> \
- ArrayXpr<BinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayRef<ArrayB_t, B_t>,\
+ ArrayXpr<ArrayBinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayRef<ArrayB_t, B_t>,\
                              name_##Op<A_t, B_t> > > \
 operator sym_ (const ArrayBase<ArrayA_t, A_t>& a,\
           const ArrayBase<ArrayB_t, B_t>& b) {\
-  typedef BinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayRef<ArrayB_t, B_t>,\
+  typedef ArrayBinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayRef<ArrayB_t, B_t>,\
                              name_##Op<A_t, B_t> > \
       xpr_t; \
   return ArrayXpr<xpr_t>(xpr_t(ArrayRef<ArrayA_t,A_t>(a),ArrayRef<ArrayB_t,B_t>(b)));\
 } \
   \
 template <class ArrayA_t, class XprB_t, typename A_t> \
- ArrayXpr<BinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayXpr<XprB_t>,\
+ ArrayXpr<ArrayBinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayXpr<XprB_t>,\
                              name_##Op<A_t, typename XprB_t::value_t> > > \
 operator sym_ (const ArrayBase<ArrayA_t, A_t>& a, const ArrayXpr<XprB_t>& b) { \
-  typedef BinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayXpr<XprB_t>, \
+  typedef ArrayBinaryXpr<ArrayRef<ArrayA_t, A_t>, ArrayXpr<XprB_t>, \
                              name_##Op<A_t, typename XprB_t::value_t> > \
       xpr_t; \
   return ArrayXpr<xpr_t>(xpr_t(ArrayRef<ArrayA_t,A_t>(a), b)); \
 } \
   \
 template <class XprA_t, class ArrayB_t, typename B_t> \
- ArrayXpr<BinaryXpr<ArrayXpr<XprA_t>, ArrayRef<ArrayB_t, B_t>, \
+ ArrayXpr<ArrayBinaryXpr<ArrayXpr<XprA_t>, ArrayRef<ArrayB_t, B_t>, \
                              name_##Op<typename XprA_t::value_t, B_t> > > \
 operator sym_ (const ArrayXpr<XprA_t>& a, const ArrayBase<ArrayB_t, B_t>& b) { \
-  typedef BinaryXpr<ArrayXpr<XprA_t>, ArrayRef<ArrayB_t, B_t>,\
+  typedef ArrayBinaryXpr<ArrayXpr<XprA_t>, ArrayRef<ArrayB_t, B_t>,\
                              name_##Op<typename XprA_t::value_t, B_t> > \
       xpr_t; \
   return ArrayXpr<xpr_t>(xpr_t(a, ArrayRef<ArrayB_t,B_t>(b))); \
@@ -294,10 +295,10 @@ operator sym_ (const ArrayXpr<XprA_t>& a, const ArrayBase<ArrayB_t, B_t>& b) { \
   \
 template <class XprA_t, class XprB_t> \
  ArrayXpr< \
-    BinaryXpr<ArrayXpr<XprA_t>, ArrayXpr<XprB_t>,\
+    ArrayBinaryXpr<ArrayXpr<XprA_t>, ArrayXpr<XprB_t>,\
               name_##Op<typename XprA_t::value_t, typename XprB_t::value_t> > > \
 operator sym_ (const ArrayXpr<XprA_t>& a, const ArrayXpr<XprB_t>& b) { \
-  typedef BinaryXpr<\
+  typedef ArrayBinaryXpr<\
       ArrayXpr<XprA_t>, ArrayXpr<XprB_t>,\
       name_##Op<typename XprA_t::value_t, typename XprB_t::value_t> > \
       xpr_t; \
@@ -312,17 +313,17 @@ PETLIB_MAKE_OP_(Div,/)
 
 #define PETLIB_MAKE_OP_(name_, sym_)                                         \
   template <class Array_t, class A_t>                                        \
-   ArrayXpr<UnaryXpr<ArrayRef<Array_t, A_t>, name_##Op<A_t> > >      \
+   ArrayXpr<ArrayUnaryXpr<ArrayRef<Array_t, A_t>, name_##Op<A_t> > >      \
   operator sym_(const ArrayBase<Array_t, A_t>& a) {                          \
-    typedef UnaryXpr<ArrayRef<Array_t, A_t>, name_##Op<A_t> > xpr_t; \
+    typedef ArrayUnaryXpr<ArrayRef<Array_t, A_t>, name_##Op<A_t> > xpr_t; \
     return ArrayXpr<xpr_t>(xpr_t(ArrayRef<Array_t,A_t>(a)));                               \
   }                                                                          \
   \
 \
 template<class XprA_t>  ArrayXpr<                                   \
-      UnaryXpr<ArrayXpr<XprA_t>, name_##Op<typename XprA_t::value_t> > >      \
+      ArrayUnaryXpr<ArrayXpr<XprA_t>, name_##Op<typename XprA_t::value_t> > >      \
   operator sym_(const ArrayXpr<XprA_t>& a) {                                 \
-    typedef UnaryXpr<ArrayXpr<XprA_t>,                               \
+    typedef ArrayUnaryXpr<ArrayXpr<XprA_t>,                               \
                              name_##Op<typename XprA_t::value_t> >           \
         xpr_t;                                                               \
     return ArrayXpr<xpr_t>(xpr_t(a));                                        \
@@ -335,30 +336,30 @@ PETLIB_MAKE_OP_(Plus,+)
 
 #define PETLIB_MAKE_OP_(name_,sym_,type_)\
 template < class Array_t, typename A_t > \
- ArrayXpr< BinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, name_##Op<A_t, type_ > > > \
+ ArrayXpr< ArrayBinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, name_##Op<A_t, type_ > > > \
 operator sym_ (const ArrayBase<Array_t,A_t>& a,const  type_ & s) {\
- typedef BinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, name_##Op<A_t, type_ > >  xpr_t;\
+ typedef ArrayBinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, name_##Op<A_t, type_ > >  xpr_t;\
  return ArrayXpr<xpr_t>(xpr_t(ArrayRef<Array_t,A_t>(a),ScalarRef< type_ >(s)));\
 } \
  \
 template < class Array_t, typename A_t> \
- ArrayXpr< BinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, Rev##name_##Op<A_t, type_ > > > \
+ ArrayXpr< ArrayBinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, Rev##name_##Op<A_t, type_ > > > \
 operator sym_ (const  type_ & s,const ArrayBase<Array_t,A_t>& a) {\
- typedef BinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, Rev##name_##Op<A_t, type_ > >  xpr_t;\
+ typedef ArrayBinaryXpr<ArrayRef<Array_t,A_t>,ScalarRef< type_ >, Rev##name_##Op<A_t, type_ > >  xpr_t;\
  return ArrayXpr<xpr_t>(xpr_t(ArrayRef<Array_t,A_t>(a),ScalarRef< type_ >(s)));\
 } \
  \
 template < class Xpr_t> \
- ArrayXpr< BinaryXpr< ArrayXpr<Xpr_t>,ScalarRef< type_ >, name_##Op<typename Xpr_t::value_t, type_ > > > \
+ ArrayXpr< ArrayBinaryXpr< ArrayXpr<Xpr_t>,ScalarRef< type_ >, name_##Op<typename Xpr_t::value_t, type_ > > > \
 operator sym_ (const ArrayXpr<Xpr_t>& a,const  type_ & s) {\
- typedef BinaryXpr<ArrayXpr<Xpr_t>,ScalarRef< type_ >, name_##Op<typename Xpr_t::value_t, type_ > >  xpr_t;\
+ typedef ArrayBinaryXpr<ArrayXpr<Xpr_t>,ScalarRef< type_ >, name_##Op<typename Xpr_t::value_t, type_ > >  xpr_t;\
  return ArrayXpr<xpr_t>(xpr_t(a,ScalarRef< type_ >(s)));\
 } \
  \
 template < class Xpr_t > \
- ArrayXpr< BinaryXpr< ArrayXpr<Xpr_t>,ScalarRef< type_ >, Rev##name_##Op<typename Xpr_t::value_t, type_ > > > \
+ ArrayXpr< ArrayBinaryXpr< ArrayXpr<Xpr_t>,ScalarRef< type_ >, Rev##name_##Op<typename Xpr_t::value_t, type_ > > > \
 operator sym_ (const  type_ & s,const ArrayXpr<Xpr_t>& a) {\
- typedef BinaryXpr<ArrayXpr<Xpr_t>,ScalarRef< type_ >, Rev##name_##Op<typename Xpr_t::value_t, type_ > >  xpr_t;\
+ typedef ArrayBinaryXpr<ArrayXpr<Xpr_t>,ScalarRef< type_ >, Rev##name_##Op<typename Xpr_t::value_t, type_ > >  xpr_t;\
  return ArrayXpr<xpr_t>(xpr_t(a,ScalarRef< type_ >(s)));\
 } 
 
