@@ -209,32 +209,34 @@ class Array : public ArrayBase<Array<T>, T> {
     return sum;
   }
 
-   value_t max() const noexcept { return *std::max(data_, data_ + n); }
+   value_t max() const noexcept { return *std::max_element(data_, data_ + n); }
 
    value_t amax() const noexcept {
-    return *std::max(data_, data_ + n, petlib::abs_cmp);
+    return *std::max_element(data_, data_ + n, petlib::abs_cmp<value_t>);
   }
 
-   value_t min() const noexcept { return *std::min(data_, data_ + n); }
+   value_t min() const noexcept { return *std::min_element(data_, data_ + n); }
 
    value_t amin() const noexcept {
-    return *std::min(data_, data_ + n, petlib::abs_cmp);
+    return *std::min_element(data_, data_ + n, petlib::abs_cmp<value_t>);
   }
 
    size_t index_max() const noexcept {
-    return size_t(std::max(data_, data_ + n) - data_);
+    return size_t(std::max_element(data_, data_ + n) - data_);
   }
 
    size_t index_amax() const noexcept {
-    return size_t(std::max(data_, data_ + n, petlib::abs_cmp) - data_);
+    pointer_t p = std::max_element(data_, data_ + n, petlib::abs_cmp<value_t>);  
+    return size_t(p - data_);
   }
 
    size_t index_min() const noexcept {
-    return size_t(std::min(data_, data_ + n) - data_);
+    return size_t(std::min_element(data_, data_ + n) - data_);
   }
 
    size_t index_amin() const noexcept {
-    return size_t(std::min(data_, data_ + n, petlib::abs_cmp) - data_);
+    pointer_t p = std::min_element(data_, data_ + n, petlib::abs_cmp<value_t>);  
+    return size_t(p- data_);
   }
 
   //
@@ -496,32 +498,32 @@ class SubArray : public ArrayBase<SubArray<T>, T> {
     return sum;
   }
 
-   value_t max() const noexcept { return *std::max(data_, data_ + n); }
+   value_t max() const noexcept { return *std::max_element(data_, data_ + n); }
 
    value_t amax() const noexcept {
-    return *std::max(data_, data_ + n, petlib::abs_cmp);
+    return *std::max_element(data_, data_ + n, petlib::abs_cmp<value_t>);
   }
 
-   value_t min() const noexcept { return *std::min(data_, data_ + n); }
+   value_t min() const noexcept { return *std::min_element(data_, data_ + n); }
 
    value_t amin() const noexcept {
-    return *std::min(data_, data_ + n, petlib::abs_cmp);
+    return *std::min_element(data_, data_ + n, petlib::abs_cmp<value_t>);
   }
 
    size_t index_max() const noexcept {
-    return size_t(std::max(data_, data_ + n) - data_);
+    return size_t(std::max_element(data_, data_ + n) - data_);
   }
 
    size_t index_amax() const noexcept {
-    return size_t(std::max(data_, data_ + n, petlib::abs_cmp) - data_);
+    return size_t(std::max_element(data_, data_ + n, petlib::abs_cmp<value_t>) - data_);
   }
 
    size_t index_min() const noexcept {
-    return size_t(std::min(data_, data_ + n) - data_);
+    return size_t(std::min_element(data_, data_ + n) - data_);
   }
 
    size_t index_amin() const noexcept {
-    return size_t(std::min(data_, data_ + n, petlib::abs_cmp) - data_);
+    return size_t(std::min_element(data_, data_ + n, petlib::abs_cmp<value_t>) - data_);
   }
 
   //
@@ -877,35 +879,35 @@ class SliceArray : public ArrayBase<SliceArray<T>, T> {
   }
 
    value_t max() const noexcept {
-    return *std::max(this->begin(), this->end());
+    return *std::max_element(this->begin(), this->end());
   }
 
    value_t amax() const noexcept {
-    return *std::max(this->begin(), this->end(), petlib::abs_cmp);
+    return *std::max_element(this->begin(), this->end(), petlib::abs_cmp<value_t>);
   }
 
    value_t min() const noexcept {
-    return *std::min(this->begin(), this->end());
+    return *std::min_element(this->begin(), this->end());
   }
 
    value_t amin() const noexcept {
-    return *std::min(this->begin(), this->end(), petlib::abs_cmp);
+    return *std::min_element(this->begin(), this->end(), petlib::abs_cmp<value_t>);
   }
 
    size_t index_max() const noexcept {
-    return size_t(std::max(this->begin(), this->end()) - data_);
+    return size_t(std::max_element(this->begin(), this->end()) - data_);
   }
 
    size_t index_amax() const noexcept {
-    return size_t(std::max(data_, this->end(), petlib::abs_cmp) - data_);
+    return size_t(std::max_element(data_, this->end(), petlib::abs_cmp<value_t>) - data_);
   }
 
    size_t index_min() const noexcept {
-         return size_t(std::min(data_,this->end())-data_);
+         return size_t(std::min_element(data_,this->end())-data_);
   }
 
    size_t index_amin() const noexcept {
-    return size_t(std::min(data_, this->end(), petlib::abs_cmp) - data_);
+    return size_t(std::min_element(data_, this->end(), petlib::abs_cmp<value_t>) - data_);
   }
 
   //

@@ -38,5 +38,15 @@ int main() {
    std::cout << "a+b \n" << (a+b) << "\n";
    petlib::Array<double> d(a*2.0);
    std::cout << d << "\n";
+
+   std::cout << d.min() << "\n";
+   std::cout << d.index_min() << "\n";
+   std::cout << d.max() << "\n";
+   std::cout << d.index_max() << "\n";
+   std::cout << d.amax() << "\n";
+   std::cout << d.index_amax() << "\n";
+   std::cout << d.amin() << "\n";
+   std::cout << d.index_amin() << "\n";
+
    return EXIT_SUCCESS;
 }
