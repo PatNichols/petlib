@@ -1,0 +1,25 @@
+
+namespace putils {
+
+class ThreadGroup {
+    std::atomic_int 
+    std::ptrdiff_t nthrds;
+    
+    
+    
+    void run( void * fun( void * ), void *args)
+    {
+        pth = malloc(sizeof(pthread_t)*nth);
+        for ( ptrdiff_t n = 0; n < nthreads; ++n) {
+            
+        }
+        for ( ptrdiff_t n = 0; n < nthreads; ++n) {
+            pthread_create(pth[n],fun,args);
+        }
+    
+    }
+
+
+}
+
+}

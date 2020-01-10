@@ -36,10 +36,10 @@ struct array_ref
      
     array_ref(const array_base<array_t,T>& a0):a(*a0.cast_down()) {}
     
-    value_type operator[](size_type i) const noexcept {
+    constexpr value_type operator[](size_type i) const noexcept {
         return a[i];
     }
-    size_type size() const noexcept { return a.size();}
+    constexpr size_type size() const noexcept { return a.size();}
 };
 
 template < class xpr_t , typename T >
@@ -50,10 +50,10 @@ struct array_xpr {
 
     array_xpr(const xpr_t& x):a(x) {}
     
-    value_type operator[](size_type i) const noexcept {
+    constexpr value_type operator[](size_type i) const noexcept {
         return a[i];
     }
-    size_type size() const noexcept { return a.size();}
+    constexpr size_type size() const noexcept { return a.size();}
 };
 
 template < class Op, class A, class B >
@@ -66,10 +66,10 @@ struct array_bin_xpr {
     
     array_bin_xpr(const A& a0,const B& b0):a(a0),b(b0) {}
     
-     value_type operator[](size_type i) const noexcept {
+    constexpr value_type operator[](size_type i) const noexcept {
         return Op::eval(a[i],b[i]);
     }
-     size_type size() const noexcept { return a.size();}
+    constexpr size_type size() const noexcept { return a.size();}
 };
 
 
@@ -82,10 +82,10 @@ struct array_un_xpr {
     
     array_un_xpr(const A& a0):a(a0) {}
     
-    value_type operator[](size_type i) const noexcept {
+    constexpr value_type operator[](size_type i) const noexcept {
         return Op::eval(a[i]);
     }
-    size_type size() const noexcept { return a.size();}
+    constexpr size_type size() const noexcept { return a.size();}
 };
 
 template < typename T> struct scalar_ref {
@@ -94,8 +94,8 @@ template < typename T> struct scalar_ref {
     const T x;
     
     scalar_ref(const T& x0):x(x0) {}
-    value_type operator[](size_type i) const noexcept { return x;}
-    value_type operator()(size_type i,size_type j) const noexcept { return x;}   
+    constexpr value_type operator[](size_type i) const noexcept { return x;}
+    constexpr value_type operator()(size_type i,size_type j) const noexcept { return x;}   
 };
 
 #define make_op(name_,sym_)\
@@ -204,7 +204,6 @@ std::ostream& operator << ( std::ostream& os, const array_base<A,T>& a) {
           os << ", " << a[i];
       }
       os << " )\n";
-      return os;
    }else{
       os << "----------------------------\n";
       os << "index           value \n"; 
@@ -213,8 +212,8 @@ std::ostream& operator << ( std::ostream& os, const array_base<A,T>& a) {
           os << std::setw(12) << i << " " << a[i] << "\n";
       }
       os << "----------------------------\n";
-      return os;
    }
+   return os;
 }
 
 template < class A, typename T > 
@@ -227,7 +226,6 @@ std::ostream& operator << ( std::ostream& os, const array_xpr<A,T>& a) {
           os << ", " << a[i];
       }
       os << " )\n";
-      return os;
    }else{
       os << "----------------------------\n";
       os << "index           value \n"; 
@@ -236,8 +234,8 @@ std::ostream& operator << ( std::ostream& os, const array_xpr<A,T>& a) {
           os << std::setw(12) << i << " " << a[i] << "\n";
       }
       os << "----------------------------\n";
-      return os;
    }
+   return os;
 }
  
 } 
