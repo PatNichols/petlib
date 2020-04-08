@@ -1,7 +1,9 @@
 #ifndef PETLIB_ARRAY_H
 #define PETLIB_ARRAY_H
 
+#include <algorithm>
 #include <cassert>
+
 #include <petlib_array_ops.hpp>
 #include <petlib_math.hpp>
 #include <petlib_range.hpp>
