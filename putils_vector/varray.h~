@@ -1,0 +1,260 @@
+
+
+template < typename T > struct varray;
+template < typename T > struct slice_array;
+template < typename T > struct gslice_array;
+template < typename T > struct mask_array;
+template < typename T > struct indirect_array;
+
+template < class array_type >
+struct array_base
+{
+   typedef typename array_type::value_t value_t;
+   
+   constexpr const array_t* leaf() const noexcept { return static_cast<const array_t*>(this);}
+   
+   constexpr value_t operator[](size_type n) const noexcept { return leaf()->operator[](n);}
+   constexpr size_type size() const noexcept  { return leaf()->size();}
+};
+
+template < class Xpr_t, typename T >
+struct array_xpr
+{
+    typedef T value_t;
+    typedef std::size_t size_type;
+
+    const Xpr_t& x;
+    
+    array_xpr( const Xpr_t& x0):x(x0) {}
+    
+    constexpr value_t operator[](size_type n) const noexcept { return Xpr_t[n];}
+    constexpr size_type size() const noexcept { return Xpr_t.size();}
+};
+
+template < typename T> struct slice_iterator {
+   typedef T value_t;
+   typedef std::size_t size_type;
+   typedef std::ptrdiff_t difference_type;
+   typedef T* pointer_t;
+   typedef const T* const_pointer_t;
+   typedef T& reference;
+   typedef const  T& const_reference_t;
+
+   slice_iterator( pointer_t p, size_type n, size_type str):
+   
+   reference operator*() noexcept { return *ptr;}
+   const_reference operator*() const noexcept { return *ptr};
+   
+   self_reference operator++() noexcept { ptr+=str; return *this;}
+   self_reference operator++(int) noexcept {
+       self tmp(ptr,str);
+       ptr+=str;
+       return tmp;
+   }
+   self_reference operator--() noexcept { ptr-=str; return *this;}
+   self_reference operator--(int) noexcept {
+       self tmp(ptr,str);
+       ptr-=str;
+       return tmp;
+   }
+
+};
+
+
+template < typename T >
+struct varray: public array_base< T, varray<T> > {
+   typedef T value_t;
+   typedef std::size_t size_type;
+   typedef std::ptrdiff_t difference_type;
+   typedef T* pointer_t;
+   typedef const T* const_pointer_t;
+   typedef T& reference;
+   typedef const  T& const_reference_t;
+   
+   value_t * alloc(size_type n) {
+       value_t * p = std::
+   }
+   
+   varray():data_(),n(){}
+   varray(const varray<T>& v):data_(new value_t[v.ne]),ne(v.ne) {
+       std::copy(v.begin(),v.end(),data_);
+   }
+   varray(varray&& v):data_(move<T>(v.data_)),ne(v.ne) {
+       v.data_ = nullptr;
+       v.ne = 0; 
+   }
+   explicit varray(size_t n):data_(new value_t[v.ne])
+   varray(const slice_array<T>& v);
+   varray(const gslice_array<T>& v);
+   varray(const mask_array<T>& v);
+   varray(const indirect_array<T>& v);
+   varray(value_t x,size_type n);   
+   varray(const initializer_list<T>& ilist);
+   varray(const_pointer_t p,size_type n);
+   varray(
+   ~varray() {
+       alloc.deallocate(data_);
+       ne = 0;
+   }
+   varray& operator=(const varray& v);
+   varray& operator=(varray&& v);
+   
+   varray& operator=(initializer_list<T>& ilist);
+   
+   constexpr value_t operator[](size_type n) const noexcept { return data_[n];};
+   value_t& operator[](size_type n) noexcept { return data_[n];};
+   
+   varray<T>& operator[](const slice& s) const noexcept;
+   slice_array<T> operator[](const slice& s) noexcept;
+   varray<T>& operator[](const gslice& s) const noexcept;
+   gslice_array<T> operator[](const gslice& s) noexcept;
+   varray<T>& operator[]( const varray<bool>& b) const noexcept;
+   mask_array<T> operator[](const varray<bool>& b) noexcept;
+   varray<T>& operator[](const varray<size_type>& ix) const noexcept;
+   indirect_array<T> operator[](const varray<size_type>& iv) noexcept;
+   
+   // unary operator
+   varray<T> operator+() const;
+   varray<T> operator-() const;
+   varray<T> operator~() const;
+   varray<bool> operator!() const;
+   
+   // boolean operators
+   bool operator==(const varray<T>& v);
+   bool operator!=(const varray<T>& v);
+   
+   
+   varray& operator+=(const varray& v);
+   varray& operator-=(const varray& v);
+   varray& operator*=(const varray& v);
+   varray& operator/=(const varray& v);
+   varray& operator^=(const varray& v);
+   varray& operator|=(const varray& v);
+   varray& operator&=(const varray& v);
+   varray& operator>>=(const varray& v);
+   varray& operator<<=(const varray& v);
+
+   varray& operator=(const slice_array<T>& v);
+   varray& operator+=(const slice_array<T>& v);
+   varray& operator-=(const slice_array<T>& v);
+   varray& operator*=(const slice_array<T>& v);
+   varray& operator/=(const slice_array<T>& v);
+   varray& operator^=(const slice_array<T>& v);
+   varray& operator|=(const slice_array<T>& v);
+   varray& operator&=(const slice_array<T>& v);
+   varray& operator>>=(const slice_array<T>& v);
+   varray& operator<<=(const slice_array<T>& v);
+
+   varray& operator=(const indirect_array<T>& v);
+   varray& operator+=(const indirect_array<T>& v);
+   varray& operator-=(const indirect_array<T>& v);
+   varray& operator*=(const indirect_array<T>& v);
+   varray& operator/=(const indirect_array<T>& v);
+   varray& operator^=(const indirect_array<T>& v);
+   varray& operator|=(const indirect_array<T>& v);
+   varray& operator&=(const indirect_array<T>& v);
+   varray& operator>>=(const indirect_array<T>& v);
+   varray& operator<<=(const indirect_array<T>& v);
+
+
+   varray& operator=(const gslice_array<T>& v);
+   varray& operator+=(const gslice_array<T>& v);
+   varray& operator-=(const gslice_array<T>& v);
+   varray& operator*=(const gslice_array<T>& v);
+   varray& operator/=(const gslice_array<T>& v);
+   varray& operator^=(const gslice_array<T>& v);
+   varray& operator|=(const gslice_array<T>& v);
+   varray& operator&=(const gslice_array<T>& v);
+   varray& operator>>=(const gslice_array<T>& v);
+   varray& operator<<=(const gslice_array<T>& v);
+
+
+   varray& operator=(const mask_array<T>& v);
+   varray& operator+=(const mask_array<T>& v);
+   varray& operator-=(const mask_array<T>& v);
+   varray& operator*=(const mask_array<T>& v);
+   varray& operator/=(const mask_array<T>& v);
+   varray& operator^=(const mask_array<T>& v);
+   varray& operator|=(const mask_array<T>& v);
+   varray& operator&=(const mask_array<T>& v);
+   varray& operator>>=(const mask_array<T>& v);
+   varray& operator<<=(const mask_array<T>& v);
+
+   varray& operator=(const T& v);
+   varray& operator+=(const T& v);
+   varray& operator-=(const T& v);
+   varray& operator*=(const T& v);
+   varray& operator/=(const T& v);
+   varray& operator^=(const T& v);
+   varray& operator|=(const T& v);
+   varray& operator&=(const T& v);
+   varray& operator>>=(const T& v);
+   varray& operator<<=(const T& v);
+
+   template < class Xpr_t >
+   template < class Xpr_t > 
+   varray& operator=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator+=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator-=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator*=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator/=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator^=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator|=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator&=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator>>=(const Expr<Xpr_t,value_type> v);
+   template < class Xpr_t > 
+   varray& operator<<=(const Expr<Xpr_t,value_type> v);
+
+   pointer_t begin() { return data_;} 
+   const_pointer_t begin() const { return data_;}
+   pointer_t end() { return data_+ne;}
+   pointer_t end() const { return data_+ne;}
+   reverse_iterator<T> rbegin() { return end();}
+   const_reverse_iterator<T> rbegin() const { return end();}
+   reverse_iterator<T> rend() { return begin();}
+   const_reverse_iterator<T> rend() const { return begin();}
+   bool empty() const noexcept { return data_==nullptr;}
+   
+   constexpr size_type size() const { return ne;}
+   constexpr pointer_t * data() const { return data_;}
+   constexpr const_pointer_t * data() const noexcept { return data_;}
+   
+   slice_iterator<T> slice(const slice& s) {
+       return slice_iterator<T>(data_+s.offset(),s.size(),s.stride());
+   }
+   
+   varray<T> apply( value_t fun( value_t ) ) const noexcept;
+   varray<T> apply( value_t fun( const value_t&) ) const noexcept;
+   void swap(varray<T>& v) noexcept {
+       for (size_type n=0;n<ne;++n) {
+           T tmp = data_[n];
+           data_[n]= v.data_[n];
+           v.data_[n]= tmp; 
+       }
+   }
+   void shift( size_type n);
+   void cshift( size_type n);
+   void resize( size_type n, value_type x=value_type());
+   
+   value_type sum() const;
+   value_type min() const;
+   value_type max() const;
+   value_type amax() const;
+   value_type amin() const;
+   size_type index_min() const;
+   size_type index_max() const;
+   size_type index_amin() const;
+   size_type index_amax() const;
+private:
+   pointer_t * p;
+   size_type ne;
+};
+

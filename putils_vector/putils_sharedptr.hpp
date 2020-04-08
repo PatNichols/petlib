@@ -1,0 +1,78 @@
+
+namespace putils {
+
+template < class T, class Alloc = std::allocator<T> >
+class shared_ptr {
+    typedef T value_type;
+    typedef T* pointer;
+    typedef T& reference;
+    typedef const T* const_pointer;
+    typedef const T& const_reference;
+    typedef std::size_t size_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef std::true_type propagate_on_container_move_assignment;
+    typedef std::true_type is_always_equal;    
+
+    pointer p;
+    std::atomic<int> * cnt;
+    Alloc alloc_;
+    RCAlloc rc_alloc_;
+    
+    shared_ptr():ptr(nullptr),rcnt(rc_alloc_.allocate(1)) {
+        rcnt->store(0);
+    }
+    shared_ptr(const shared_ptr& s):ptr(s.ptr),rcnt(s.rcnt) { rcnt->fetch_and_add(1);}
+    shared_ptr(shared_ptr&& p):ptr(std::move(s.ptr)),rcnt(std::move(s.rcnt)) {}
+    shared_ptr(pointer p):ptr(p),rcnt(new std::atomic<long>(1)) {}
+    
+    template < class Args... >
+    shared_ptr(Args&& ...args):ptr(alloc_.allocate(1)),rcnt(rc_allocate.allocate(1)) {
+        alloc_.construct(ptr,args);
+        rcnt -> store(1);
+    }
+    
+    ~shared_ptr() {
+        if (cnt->fetch_and_sub(1)==1) {
+            alloc_.deallocate(ptr);
+            rc_dealloc_.deallocate(cnt);
+        }
+        ptr = nullptr;
+        cnt = nullptr;
+    }
+    
+    shared_ptr& operator=(const shared_ptr& p);
+    shared_ptr&& operator=(shared_ptr&& p);
+    
+    constexpr pointer get() noexcept { return ptr;}
+    constexpr bool empty() noexcept { return ptr==nullptr;}
+    constexpr long use_count() noexcept { return rcnt->load();}
+    constepxr bool unique() noexcept { return rcnt->load()==0;}
+    constexpr bool operator() const noexcept { return ptr==nullptr;}
+
+    constexpr reference operator*() noexcept { return *ptr;}
+    constexpr pointer operator->() noexcept { return ptr;}
+    constexpr pointer get() noexcept { return ptr;}
+  
+    constexpr void reset(pointer p = nullptr) noexcept {
+        if (rcnt->fetch_and_sub(1L)==1) {
+            alloc_.deallocate(ptr);
+        }
+        ptr = p;
+        rcnt->store(0L);
+    }    
+  
+    constexpr void swap(shared_ptr& s) noexcept {
+        std::atomic<long> *s_cnt = s.rcnt;
+        s.rcnt = rcnt;
+        rcnt = s_cnt;
+        pointer tmp_ptr=ptr;
+        ptr = s.ptr;
+        s.ptr = tmp_ptr;
+    } 
+};    
+    
+
+};
+
+}
+#endif    
